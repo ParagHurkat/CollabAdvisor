@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollabAdvisor", "CollabAdvisor\CollabAdvisor.csproj", "{A9F54C9A-00C1-43FF-AD3C-54670A63AFAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9F54C9A-00C1-43FF-AD3C-54670A63AFAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9F54C9A-00C1-43FF-AD3C-54670A63AFAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9F54C9A-00C1-43FF-AD3C-54670A63AFAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9F54C9A-00C1-43FF-AD3C-54670A63AFAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2899BB03-C902-415F-9D87-1D0E16FC0553}
+	EndGlobalSection
+EndGlobal
