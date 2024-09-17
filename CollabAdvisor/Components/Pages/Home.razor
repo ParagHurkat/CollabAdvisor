@@ -1,7 +1,53 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>CollabAdvisor</h1>
 
-Welcome to your new app.
+
+<p>Please enter your case Number</p>
+
+<input type="text" id="caseID" @bind="caseID" />
+
+
+
+<p>Please Enter your collab description</p>
+
+<textarea rows="10" cols="33" id="collabDesc" @bind="collabDesc"></textarea>
+
+
+
+<button class="btn btn-primary" @onclick="GetSuggestions">GetSuggestions</button>
+
+
+<br />
+
+<textarea rows="10" cols="33" id="suggestionBox" @bind="suggestionBox"></textarea>
+
+
+@code
+{
+    private int caseID;
+    private string collabDesc;
+    private string suggestionBox;
+
+    private void GetSuggestions()
+    {
+        // TODO, Add the proper code to put this into DB and also later use openAI
+
+        string suggestions = @"
+Kerberos error logging is a useful tool for troubleshooting authentication issues in a Microsoft Windows environment. When enabled, it logs detailed Kerberos events in the event log, which can help identify and resolve problems with Kerberos authentication.
+
+To enable Kerberos event logging, you can follow these steps:
+
+Open the registry editor and navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters.
+Create a new DWORD value named LogLevel and set its value to 1.
+Restart the computer to apply the changes.
+Once enabled, all Kerberos errors will be logged in the event log. However, it's important to note that some errors are expected based on the protocol specification and may generate false-positive events even when there are no operational errors. For example, the KDC_ERR_PREAUTH_REQUIRED error is returned on the initial Kerberos AS request when the Windows Kerberos Client does not include pre-authentication information in the first reques
+";
+
+        suggestionBox = suggestions;
+    }
+
+}
