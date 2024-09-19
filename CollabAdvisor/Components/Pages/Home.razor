@@ -1,53 +1,117 @@
 ﻿@page "/"
-@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.SemanticKernel
+@using System.Diagnostics
+@using System.Text.Json
 
-<PageTitle>Home</PageTitle>
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject ILogger<Home> logger
+@inject Kernel Kernel
 
-<h1>CollabAdvisor</h1>
-
-
-<p>Please enter your case Number</p>
-
-<input type="text" id="caseID" @bind="caseID" />
-
-
-
-<p>Please Enter your collab description</p>
-
-<textarea rows="10" cols="33" id="collabDesc" @bind="collabDesc"></textarea>
-
-
-
-<button class="btn btn-primary" @onclick="GetSuggestions">GetSuggestions</button>
-
-
-<br />
-
-<textarea rows="10" cols="33" id="suggestionBox" @bind="suggestionBox"></textarea>
-
+<FluentWizard @ref="@wizard"
+              StepperPosition="@StepperPosition.Top"
+              StepSequence="@WizardStepSequence.Linear"
+              DisplayStepNumber="@(WizardStepStatus.Current | WizardStepStatus.Next)"
+              Border="WizardBorder.None"
+              StepTitleHiddenWhen="@GridItemHidden.XsAndDown"
+              Height="100%"
+              OnFinish="@OnFinishedAsync">
+    <Steps>
+        <FluentWizardStep Label="Get started" OnChange="@OnStepChange" Summary="Provide Case Details">
+            <FluentEditForm Model="caseDetails" FormName="caseId" OnValidSubmit="OnValidSubmit">
+                <FluentStack Orientation="Orientation.Vertical"
+                             HorizontalAlignment="@HorizontalAlignment.Center"
+                             VerticalGap="20">
+                    <DataAnnotationsValidator />
+                    <h2 style="margin-top:5%">Welcome to Collab Advisor</h2>
+                    <h5>Provide the case number to begin:</h5>
+                    <FluentTextField @bind-Value=caseDetails.CaseNumber Placeholder="Case Number"></FluentTextField>
+                    <FluentValidationSummary style="color:darkred" />
+                </FluentStack>
+            </FluentEditForm>
+        </FluentWizardStep>
+        <FluentWizardStep Label="Provide Details"
+                          Summary="Describe the Problem"
+                          OnChange="@OnStepChange">
+            <FluentEditForm Model="descriptionModel" FormName="caseId" OnValidSubmit="FetchSuggestions">
+                <FluentStack Orientation="Orientation.Vertical"
+                             HorizontalAlignment="@HorizontalAlignment.Center"
+                             VerticalGap="20">
+                    <DataAnnotationsValidator />
+                    <h5 style="margin-top:5%">Describe the need for a collab:</h5>
+                    <FluentTextArea @bind-Value=descriptionModel.AssistanceDetails Placeholder="Problem description" Cols="80"></FluentTextArea>
+                    <FluentValidationSummary style="color:darkred" />
+                </FluentStack>
+            </FluentEditForm>
+        </FluentWizardStep>
+        <FluentWizardStep Label="Recommendations"
+                          Summary="@suggestionStatus"
+                          OnChange="@OnStepChange">
+            @if (suggestions.Count > 0)
+            {
+                <Suggestions SuggestionList="@suggestions" Resolved="()=> { issueResolved = true; wizard.GoToStepAsync(3); }" />
+            }
+        </FluentWizardStep>
+        <FluentWizardStep Label="Finish"
+                          OnChange="@OnStepChange">
+            <Finished IsResolved="issueResolved" />
+        </FluentWizardStep>
+    </Steps>
+</FluentWizard>
+<FluentOverlay @bind-Visible=@_overlayIsVisible
+               Opacity="0.4"
+               Alignment="Align.Center"
+               Justification="@JustifyContent.Center">
+    <FluentProgressRing />
+</FluentOverlay>
 
 @code
 {
-    private int caseID;
-    private string collabDesc;
-    private string suggestionBox;
+    CaseModel caseDetails = new();
+    List<SuggestionModel> suggestions = new();
+    DescriptionModel descriptionModel = new();
+    FluentWizard wizard = default!;
+    string suggestionStatus = "Review Insights";
+    bool isTop;
+    bool issueResolved;
+    WizardStepSequence StepSequence = WizardStepSequence.Linear;
+    private bool _overlayIsVisible = false;
 
-    private void GetSuggestions()
+    void OnStepChange(FluentWizardStepChangeEventArgs e)
     {
-        // TODO, Add the proper code to put this into DB and also later use openAI
 
-        string suggestions = @"
-Kerberos error logging is a useful tool for troubleshooting authentication issues in a Microsoft Windows environment. When enabled, it logs detailed Kerberos events in the event log, which can help identify and resolve problems with Kerberos authentication.
-
-To enable Kerberos event logging, you can follow these steps:
-
-Open the registry editor and navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters.
-Create a new DWORD value named LogLevel and set its value to 1.
-Restart the computer to apply the changes.
-Once enabled, all Kerberos errors will be logged in the event log. However, it's important to note that some errors are expected based on the protocol specification and may generate false-positive events even when there are no operational errors. For example, the KDC_ERR_PREAUTH_REQUIRED error is returned on the initial Kerberos AS request when the Windows Kerberos Client does not include pre-authentication information in the first reques
-";
-
-        suggestionBox = suggestions;
     }
 
+    async Task OnFinishedAsync()
+    {
+        await DialogService.ShowInfoAsync("Wizard completed");
+    }
+
+    async Task OnValidSubmit()
+    {
+        _overlayIsVisible = true;
+        await Task.Delay(2000);
+        _overlayIsVisible = false;
+    }
+
+    async Task FetchSuggestions()
+    {
+        try
+        {
+            suggestionStatus = "Thinking..Please wait";
+            _overlayIsVisible = true;
+            var prompt = $"{Constants.GenerateSuggestionPrompt}{Environment.NewLine}{descriptionModel.AssistanceDetails}";
+            var result = await Kernel.InvokePromptAsync(prompt);
+            suggestions = JsonSerializer.Deserialize<List<SuggestionModel>>(result.ToString()) ?? [];
+            suggestionStatus = "Try solutions";
+            _overlayIsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            ToastService.ShowWarning(ex.Message);
+            _overlayIsVisible = false;
+        }
+    }
 }

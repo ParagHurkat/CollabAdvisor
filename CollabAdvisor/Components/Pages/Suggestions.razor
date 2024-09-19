@@ -1,0 +1,41 @@
+﻿<FluentAccordion ExpandMode="AccordionExpandMode.Multi">
+    @foreach (var (item, i) in SuggestionList.Select((value, i) => (value, i)))
+    {
+        <FluentAccordionItem Heading="@($"{i+1}. {item.Title}")" @bind-Expanded="@item.Expanded">
+            <pre>@item.Description</pre>
+            <div style="display: flex; flex-direction: row-reverse; flex-wrap: nowrap; justify-content: normal; align-items: center; align-content: center;">
+                <FluentButton Appearance="Appearance.Accent" style="margin:0 5px;" OnClick="async () => await Resolved.InvokeAsync()" IconEnd="@(new Icons.Regular.Size16.Checkmark())" >Issue Resolved</FluentButton>
+                <FluentButton OnClick="() => MoveNext(item, i)" IconEnd="@(new Icons.Regular.Size16.Dismiss())">Didn't Resolve </FluentButton>
+            </div>
+        </FluentAccordionItem>
+    }
+</FluentAccordion>
+
+@code {
+    [Parameter]
+    public List<SuggestionModel> SuggestionList { get; set; } = [];
+
+    [Parameter]
+    public EventCallback Resolved { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (SuggestionList != null && SuggestionList.Count > 0)
+        {
+            SuggestionList.FirstOrDefault()!.Expanded = true;
+        }
+
+        base.OnInitialized();
+    }
+
+    void MoveNext(SuggestionModel model, int index)
+    {
+        model.Expanded = false;
+        if (index + 1 < SuggestionList.Count)
+        {
+            SuggestionList[index + 1].Expanded = true;
+        }
+
+        StateHasChanged();
+    }
+}

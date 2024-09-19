@@ -1,0 +1,20 @@
+@if (IsResolved)
+{
+    <h3 style="margin-top:5%;text-align:center">Thanks for using Collab Advisor!</h3>
+}
+else
+{
+    <div style="margin-top:5%;text-align:center">
+        <h2 style="margin-top:5%">Plesae create a collab with following SAP</h2>
+        <FluentBadge Appearance="Appearance.Lightweight">
+            @supportAreaPath
+        </FluentBadge>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsResolved { get; set; }
+
+    string supportAreaPath = "TODO";
+}
