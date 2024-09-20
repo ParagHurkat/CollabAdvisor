@@ -1,0 +1,23 @@
+﻿@page "/admin"
+
+<FluentDataGrid Items="@people">
+    <PropertyColumn Property="@(p => p.caseNumber)" Sortable="true" />
+    <PropertyColumn Property="@(p => p.isDeflected)" Sortable="true" />
+</FluentDataGrid>
+
+
+
+@code {
+    record Person(int PersonId, string Name, DateOnly BirthDate);
+    record collabData(string caseNumber, bool isDeflected);
+
+    IQueryable<collabData> people = new[]
+    {
+        new collabData("10895",true),
+        new collabData("10896",false),
+        new collabData("10897",true),
+        new collabData("10898",true),
+        new collabData("10899",false),
+        new collabData("10900",true),
+    }.AsQueryable();
+}
