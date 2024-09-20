@@ -1,3 +1,6 @@
+@using Microsoft.SemanticKernel
+@inject Kernel Kernel
+
 @if (IsResolved)
 {
     <h3 style="margin-top:5%;text-align:center">Thanks for using Collab Advisor!</h3>
@@ -6,7 +9,7 @@ else
 {
     <div style="margin-top:5%;text-align:center">
         <h2 style="margin-top:5%">Plesae create a collab with following SAP</h2>
-        <FluentBadge Appearance="Appearance.Lightweight">
+        <FluentBadge Appearance="Appearance.Accent">
             @supportAreaPath
         </FluentBadge>
     </div>
@@ -16,5 +19,19 @@ else
     [Parameter]
     public bool IsResolved { get; set; }
 
-    string supportAreaPath = "TODO";
+    [Parameter]
+    public string ProblemDescription { get; set; } = default!;
+
+    string supportAreaPath = String.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DetectSap();
+    }
+
+    async Task DetectSap()
+    {
+        var response = await Kernel.InvokePromptAsync($"{Constants.FindSapPrompt}{Environment.NewLine}{ProblemDescription}");
+        supportAreaPath = response.ToString();
+    }
 }

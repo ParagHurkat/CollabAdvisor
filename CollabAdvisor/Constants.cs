@@ -24,6 +24,18 @@
             __________________________________
 
             """;
-        public const string FindSapPrompt = "";
+        public const string FindSapPrompt = """
+          Based on the problem description, provide me a support area path. Here are some examples:
+          
+          1. ASP.NET/Performance/Slowness
+          2. IIS/Configuration/Errors
+          3. Active Directory/Security/Kerberos
+
+          The response should only be the support area path, nothing else.
+          
+          Here is the problem description:
+          __________________________________
+
+          """;
     }
 }
